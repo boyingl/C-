@@ -8,3 +8,10 @@ width of the output is no wider than the provided command-line argument.
 
 word wrap augmented: enhance word wrap by accepting a second optional command-line option,
 which will be the name of a file.
+
+simple drone operation: a C++ class (implemented as a struct) to control a simple
+robotic drone exploring some terrain.
+
+unix make: implement unix make tool
+
+set data structure: implement set data structure with set operations
