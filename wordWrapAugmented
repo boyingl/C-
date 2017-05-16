@@ -1,0 +1,210 @@
+//1 args from command line, positive int, default 25
+//optional 1 args from command line, name of text file
+//can give no args, 1 length, 1 file name, both
+//stdin sequence of words
+//word vs rest line: word longer go to next new line
+//word vs empty line: longer break
+//#include "a2q4.h"
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+using std::string;
+using std::cin;
+using std::cout;
+using std::istringstream;
+using std::endl;
+using std::ifstream;
+
+void wordWrap(int line = 25, string fName = "");
+int search (string fName, string target);
+void wordWrap3(int line = 25);
+void printWord3(string word, int& rest, int line);
+void printHyphen(int preHyphen, string word, int& rest, int line);
+
+void wordWrap(int line, string fName){
+  
+//cout << "line is " << line << endl << "file is " << fName<<endl;
+
+
+  //worWrap3 if file does not exist or cannot open or empty
+  if("" == fName){
+    wordWrap3(line);
+//cout<<" no file" << endl;
+    return;
+  }
+
+  ifstream fin {fName};
+  if(!(fin.is_open()) || fin.eof()){
+//cout<<"empty file" << endl;
+    wordWrap3(line);
+    return;
+  }
+  
+  string word = "";
+  int rest = line;
+  bool empty = true;  
+  while(cin >> word){
+    empty = false;
+  //  cout << "read in word " << word << endl;
+  //  cout << "rest is " << rest << "right after reading the word" << endl;
+    if(0 == rest){
+      cout << endl;
+      rest = line;
+   //   cout << "just made a new line now rest is "<< rest << endl; 
+    }
+    int wlength = word.length();
+  //  cout << "word length is " << wlength << ", rest long is " << rest << endl;   
+    //word fit in rest of the line
+    if((rest > wlength) || ((rest == wlength) && (rest == line))){
+      printWord3(word, rest, line);
+      continue;
+    }
+  
+    //not fit, search
+    int preHyphen = search(fName, word);
+    if(0 == preHyphen) printWord3(word, rest, line); //not found
+    else printHyphen(preHyphen, word, rest, line);
+  }
+  if(!empty) cout << endl;
+  return;
+}
+//called only when line does not fit word but fit preHyphen + 1
+void printHyphen(int preHyphen, string word, int& rest, int line){
+  if(0 == rest){
+    cout << endl;
+    rest = line;
+   }  
+  int wlength = word.length();
+  if((rest > wlength) || ((rest == wlength) && (rest == line))) printWord3(word, rest, line);
+  
+  else if(rest == line){
+    if(preHyphen == line) printWord3(word, rest, line);
+    else if(preHyphen > line){
+      cout << word.substr(0, line) << endl;
+      rest = line;
+      printHyphen(preHyphen -line, word.substr(line), rest, line);
+    }
+    else{
+      cout << word.substr(0,preHyphen) << "-" << endl;
+      rest = line;
+      printWord3(word.substr(preHyphen), rest, line);
+    }
+  } 
+
+
+  else{
+    if(preHyphen +1 >= rest){
+      rest = 0;
+      if(line >= word.length()) printWord3(word, rest, line);
+      else printHyphen(preHyphen, word, rest, line);
+     }
+    
+    else{
+      cout << " " << word.substr(0,preHyphen) << "-" << endl;
+      rest = line;
+      printWord3(word.substr(preHyphen), rest, line);
+    }
+  }
+
+  return;
+}
+
+
+
+int search(string fName, string target){
+  ifstream inf {fName};
+  
+  int result = 0;
+  string word ="";
+  while (inf >> word){
+    if(word == target){
+      inf >> result;
+      break;
+    }
+
+    inf >> word; //consume the int
+  }
+
+  return result;
+}
+
+
+void wordWrap3(int line){
+
+  string word = "";
+  int rest = line;
+  bool empty = true;
+  while(cin >> word){
+    empty = false;
+    printWord3(word, rest, line);
+  }
+  if(!empty) cout << endl;
+  return;
+}
+
+void printWord3(string word, int& rest, int line){
+  
+  if(0 == rest){
+    cout << endl;
+    rest = line;
+  }
+  int wlength = word.length();
+  
+  //can fit 
+  if(rest > wlength){
+    if (rest != line){
+      cout << " ";
+      rest --;
+    }
+    cout << word;
+    rest -= wlength;
+  }
+
+  else if(rest == wlength && rest == line){
+    cout << word;
+    rest -= wlength;
+  }
+
+  //not fit, at new line, chop 
+  else if(rest == line){
+    cout << word.substr(0, line);  
+    rest -= rest;
+    printWord3(word.substr(line), rest, line);
+  }
+
+  //not fit, at rest of line
+  else{
+    rest = 0;
+    printWord3(word, rest, line);
+  }
+
+  return;
+} 
+
+
+int main(int argc, char* argv[]){
+  
+  if(0 == (argc -1)){
+    wordWrap();
+    return 0;
+  }
+  string first = argv[1];
+  istringstream is {first};
+  int length = 0;
+  
+  if(1 == (argc -1)){
+    if(is >> length) wordWrap(length);
+    else wordWrap(25, first);
+  }
+
+  else {
+    is >> length;
+    string name = argv[2];
+    wordWrap(length,name); 
+  }
+  
+  return 0;
+}
+
+
