@@ -32,3 +32,37 @@ struct Makefile {
 
 #endif
 
+
+#ifndef _TARGET_H_
+#define _TARGET_H_
+#include <iostream>
+#include <string>
+
+const int maxDepends = 10;
+
+struct Target {  
+  std::ostream &out; 
+  std::string name;
+  bool leaf;
+  int updateTime;
+  int numDepends;
+  Target* depends[maxDepends];
+  //if the target is rebuilt after build command
+  bool isBuilt;
+
+
+  Target(const std::string &name, std::ostream &out = std::cout);
+  ~Target();
+
+  bool isLeaf() const;
+  void addDepend(Target *d);
+  void update(int time);
+  int lastUpdated() const;
+  //update time stamp of all non-leaf node rooting at calling object
+  void updateAll(const int time);
+  void build();
+
+};
+
+#endif
+
